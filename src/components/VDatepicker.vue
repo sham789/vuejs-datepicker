@@ -1,0 +1,299 @@
+<template>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+    <div class="cont dpicker-fields">
+        <input type="text"
+               placeholder="Check In"
+               v-model="checkIn"
+               :class="{ 'chosen-dpicker-field': !isCheckOut && isCheckOut !== null }"
+               v-on:click="showCalendar($event, false)"
+        >
+        <input type="text"
+               placeholder="Check Out"
+               v-model="checkOut"
+               :class="{ 'chosen-dpicker-field': isCheckOut }"
+               v-on:click="showCalendar($event, true)"
+        >
+    </div>
+    <div id="sham-datepicker" v-if="seen" v-on:mouseleav1e="hideCalendar">
+        <div class="h-wrapper d-grid">
+            <a @click="decreaseMonth">
+                Left
+            </a>
+            <div>{{ currentMonth.monthName }} {{ currentMonth.year }}</div>
+            <a @click="increaseMonth">
+                Right
+            </a>
+        </div>
+        <hr/>
+        <div class="w-wrapper d-grid">
+            <div v-for="dayn in weeks" class="g-item">{{ dayn }}</div>
+        </div>
+        <hr/>
+        <div class="w-wrapper d-grid">
+            <a
+                    v-for="month in adjacentMonthRange"
+                    class="g-item"
+                    v-on:click="selectDate($event, month)"
+            >{{ month.day }}
+                <div
+                        :style="{ display: 'none' }"
+                >{{ convertRangeDayInstanceToClassName(month, false, '-') }}</div>
+            </a>
+        </div>
+        <div>
+            <a
+                    class="dp-clear-dates-btn"
+                    v-on:click="clearDates">
+                Clear dates
+            </a>
+        </div>
+    </div>
+</template>
+
+<script>
+    export default {
+        name: "VDatepicker",
+        data: function() {
+            return {
+                checkIn: 'Check In',
+                checkOut: 'Check Out',
+                seen: true,
+                isCheckOut: null,
+                weeks: ['SU','MO','TU','WE','TH','Fr','SA'],
+                currentDate: 10,
+                days: Array(42).fill('*'),
+                bindedText: ''
+            }
+        },
+        computed: {
+            currentMonth: function() {
+                return this.getMonthFromNum(this.currentDate)
+            },
+            adjacentMonthsDayBegin: function() {
+                let centerDate = this.currentMonth.fullDate;
+
+                let dateRange = Array(3).fill(1).map((elem,index) => {
+                    let date = new Date(centerDate);
+                    date.setMonth(date.getMonth() + index - 1);
+                    let firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+
+                    return firstDayOfMonth;
+                });
+                return dateRange;
+            },
+            adjacentMonthsDayEnd: function() {
+                let centerDate = this.currentMonth.fullDate;
+
+                let dateRange = Array(3).fill(1).map((elem,index) => {
+                    let date = new Date(centerDate);
+                    date.setMonth(date.getMonth() + index - 1);
+                    let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth()+1, 0).getDate();
+
+                    return lastDayOfMonth;
+                });
+
+                return dateRange;
+            },
+            adjacentMonthRange: function() {
+                let main = {
+                    range: []
+                };
+
+                function RangeDay(day, month, year) {
+                    this.day = day;
+                    this.month = month;
+                    this.year = year;
+
+                    return {
+                        day: this.day,
+                        month: this.month,
+                        year: this.year
+                    }
+                }
+
+                let [start, end] = [this.adjacentMonthsDayBegin, this.adjacentMonthsDayEnd];
+                let prevRange = [],
+                    nextRange = [];
+                let dateYear = this.currentMonth.year;
+
+                for(let i = 1;i < 43; i++) {
+                    if(i >= start[1] && i < end[1] + start[1]) {
+                        main.range.push(new RangeDay(i - start[1] + 1, this.currentMonth.monthNumber, dateYear));
+                    } else {
+                        let yearOffset = 0;
+
+                        if(i < start[1]) {
+                            if(this.currentMonth.monthNumber === 0) yearOffset = -1;
+
+                            prevRange.push(new RangeDay(Math.abs(end[0] - i + 1), this.currentMonth.monthNumber - 1, dateYear + yearOffset));
+                        } else {
+                            if(this.currentMonth.monthNumber === 11) yearOffset = 1;
+
+                            nextRange.push(new RangeDay(Math.abs(i - start[1] - end[1] + 1), this.currentMonth.monthNumber + 1, dateYear + yearOffset));
+                        }
+                    }
+                }
+
+                prevRange.reverse();
+
+                return [...prevRange, ...main.range, ...nextRange];
+            }
+        },
+        methods: {
+            initRange: function() {
+
+            },
+            clearDates: function() {
+                this.checkIn = 'Check In';
+                this.checkOut = 'Check Out';
+            },
+            selectDate: function(event, rangeDayInstance) {
+                let selectedDate = this.convertRangeDayInstanceToClassName(
+                    rangeDayInstance, true, '/');
+
+                let fieldsInvalid = {
+                    checkIn: this.checkIn === 'Check In',
+                    checkOut: this.checkOut === 'Check Out'
+                }
+
+                if(this.isCheckOut) {
+                    this.checkOut = selectedDate;
+                } else {
+
+                    this.checkIn = selectedDate;
+                    let dateComparison = this.compareTwoDates(this.checkIn, this.checkOut);
+
+                    if(dateComparison.firstBigger || dateComparison.equals) {
+                        let incremented = this.incrementDateBy(this.checkIn, 'day', 1);
+                        this.checkOut = this.getDateConverted(incremented, true, '/');
+                    }
+
+                    if(!fieldsInvalid.checkIn) {
+
+                    } else {
+
+                    }
+
+                }
+
+                if(fieldsInvalid.checkIn || fieldsInvalid.checkOut) {
+                    this.isCheckOut = !this.isCheckOut;
+                }
+
+                this.hoveredDate = event.target.firstElementChild.innerText;
+            },
+            showCalendar: function(event, isCheckOut) {
+                this.isCheckOut = isCheckOut;
+                this.seen = true;
+            },
+            hideCalendar: function(event) {
+                this.seen = false;
+            },
+            computeMonth: function(date) {
+                return (Math.random() * date).toFixed(1)
+            },
+            increaseMonth: function() {
+                this.currentDate++;
+            },
+            decreaseMonth: function() {
+                this.currentDate--;
+            },
+            getMonthFromNum: function(num) {
+                let date = new Date();
+                date.setMonth(num);
+                let locale = "en-us";
+                let month = date.toLocaleString(locale, { month: "long" });
+
+                return {
+                    monthName: month,
+                    year: date.getFullYear(),
+                    fullDate: date,
+                    monthNumber: date.getMonth()
+                }
+            },
+            getDateConverted: function (date, sliceYear, delimiter = '-') {
+                // mm-dd-yy
+                let current = new Date(date);
+                let converted = [
+                    current.getMonth() + 1,
+                    current.getDate(),
+                    current.getFullYear()
+                ].map((elem, index) => this.concatZeroToDate(elem, index, sliceYear));
+
+                return converted.join(delimiter);
+            },
+            /* Method is used for checking inside array mapping */
+            concatZeroToDate: function(date, index, sliceYear) {
+                if (index !== 2 && date < 10) {
+                    date = '0' + date;
+                } else if (index === 2) {
+                    date = date.toString().slice(0, 4);
+                    if(sliceYear) date = date.slice(2);
+                }
+
+                return date;
+            },
+            incrementDateBy: function(initDate, param, incrementValue) {
+                let incrementMethods = {
+                    day: function(dt) {
+                        dt = new Date(dt);
+                        dt.setDate(dt.getDate() + incrementValue);
+                        return dt;
+                    },
+                    month: function(dt) {
+                        dt = new Date(dt);
+                        dt.setMonth(dt.getMonth() + incrementValue);
+                        return dt;
+                    }
+                }
+
+                if(Object.keys(incrementMethods).indexOf(param) !== -1) {
+                    let date = incrementMethods[param](initDate);
+                    return date;
+                } else {
+                    return param;
+                }
+            },
+            compareTwoDates: function(firstDate, secondDate) {
+                // Date is supported in any format
+                let dates = [...arguments].map(date => {
+                    let dt = new Date(date);
+                    return dt.getTime();
+                });
+                console.log([...arguments], dates, dates[0] > dates[1]);
+
+                return {
+                    firstBigger: dates[0] > dates[1],
+                    equals: dates[0] === dates[1],
+                    lastBigger: dates[0] < dates[1]
+                };
+            },
+            convertDateToInput: function(date) {
+                let splittedDate = this.getDateConverted(date).split('-');
+
+                if(splittedDate[2].length > 2) {
+                    splittedDate[2] = splittedDate.slice(2)
+                };
+                return splittedDate.join('/');
+            },
+            convertRangeDayInstanceToClassName: function(rangeDayInstance, sliceYear, delimiter = '-') {
+                /*
+              * Please take into consideration that month value is incremented by 1
+              */
+                let splittedDate = [
+                    rangeDayInstance.month + 1,
+                    rangeDayInstance.day,
+                    rangeDayInstance.year,
+                ].map((date, index) => this.concatZeroToDate(date, index));
+
+                if(sliceYear) splittedDate[2] = splittedDate[2].toString().slice(2);
+
+                return splittedDate.join(delimiter);
+            }
+        }
+    }
+</script>
+
+<style scoped>
+
+</style>
