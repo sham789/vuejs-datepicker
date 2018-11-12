@@ -8,7 +8,7 @@
     "build:dev": "webpack",
     "build:production": "cross-env NODE_ENV=production webpack",
     "watch": "webpack --watch",
-    "start:dev": "webpack-dev-server"
+    "start:dev": "webpack-dev-server --watch"
   },
   "repository": {
     "type": "git",

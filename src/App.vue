@@ -9,13 +9,10 @@
         name: "App",
         components: {
             VDatepicker
-        },
-        data: function() {
-            userName: 'John'
         }
     }
 </script>
 
-<style scoped>
+<style>
 
 </style>

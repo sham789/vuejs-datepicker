@@ -302,120 +302,117 @@
     $dp-width: 320px;
     $dp-height: 332px + 25;
 
-    #app {
-        .cont {
-            padding: 15px;
+    .cont {
+        padding: 15px;
+    }
+
+    .dpicker-fields {
+        input {
+            border: none;
+            border-radius: 6px;
+            width: 142px;
+            padding: 8px;
+            font-size: 16px;
         }
 
-        .dpicker-fields {
-            input {
-                border: none;
-                border-radius: 6px;
-                width: 142px;
-                padding: 8px;
-                font-size: 16px;
-            }
-
-            .chosen-dpicker-field {
-                color: $bg-chosen-day;
-                background: #a3cdff;
-            }
+        .chosen-dpicker-field {
+            color: $bg-chosen-day;
+            background: #a3cdff;
         }
+    }
 
+    #sham-datepicker {
         font-family: 'Open Sans';
         font-weight: 600;
+        position: absolute;
+        width: $dp-width;
+        height: $dp-height;
+        background: #ffffff;
+        box-shadow: 0 6px 32px 0 rgba(0,0,0,0.15);
+        border-radius: 6px;
+        left: 15px;
+        margin: 0 auto;
 
-        #sham-datepicker {
-            position: absolute;
-            width: $dp-width;
-            height: $dp-height;
-            background: #ffffff;
-            box-shadow: 0 6px 32px 0 rgba(0,0,0,0.15);
-            border-radius: 6px;
-            left: 15px;
-            margin: 0 auto;
+        hr {
+            margin: 0px;
+            opacity: 0.5;
+            height: 1px;
+            background: #EDEDED;
+        }
 
-            hr {
-                margin: 0px;
-                opacity: 0.5;
-                height: 1px;
-                background: #EDEDED;
+        a {
+            cursor: pointer;
+        }
+
+        .d-grid {
+            display: grid;
+        }
+
+        .h-wrapper {
+            padding: 13px 20px 13px;
+            grid-template-columns: 40px 1fr 40px;
+            text-align: center;
+        }
+
+        .dp-clear-dates-btn {
+            font-size: 13px;
+            color: $bg-chosen-day;
+            float: right;
+            margin-right: 45px;
+
+            &:hover {
+                text-decoration: underline;
             }
+        }
+
+        .w-wrapper {
+            padding: 5px 30px;
+            /* padding: 7.5px 30px; */
+            grid-template-columns: repeat(7, 1fr);
+            /* grid-column-gap: 5px; */
+            grid-row-gap: 5px;
 
             a {
                 cursor: pointer;
             }
 
-            .d-grid {
-                display: grid;
-            }
-
-            .h-wrapper {
-                padding: 13px 20px 13px;
-                grid-template-columns: 40px 1fr 40px;
+            .g-item {
                 text-align: center;
+                justify-item: center;
+                /* background: #ddd; */
+                background: #fff;
+                padding: 5px 0 5px;
+                width: 100%;
             }
 
-            .dp-clear-dates-btn {
-                font-size: 13px;
-                color: $bg-chosen-day;
-                float: right;
-                margin-right: 45px;
-
-                &:hover {
-                    text-decoration: underline;
-                }
+            .picked-day {
+                background: $bg-chosen-day;
+                color: #fff;
+                border-radius: 6px;
             }
 
-            .w-wrapper {
-                padding: 5px 30px;
-                /* padding: 7.5px 30px; */
-                grid-template-columns: repeat(7, 1fr);
-                /* grid-column-gap: 5px; */
-                grid-row-gap: 5px;
+            .hidden-bg-day {
 
-                a {
-                    cursor: pointer;
-                }
+            }
 
-                .g-item {
-                    text-align: center;
-                    justify-item: center;
-                    /* background: #ddd; */
-                    background: #fff;
-                    padding: 5px 0 5px;
-                    width: 100%;
-                }
+            .in-range-day {
+                background: $bg-chosen-day;
+                color: #fff;
+                opacity: 0.35;
+            }
 
-                .picked-day {
-                    background: $bg-chosen-day;
-                    color: #fff;
-                    border-radius: 6px;
-                }
+            .in-range-first-day {
+                background: $bg-chosen-day;
+                color: #fff;
+                border-radius: 6px 0 0 6px;
+                opacity: 0.35;
+            }
 
-                .hidden-bg-day {
-
-                }
-
-                .in-range-day {
-                    background: $bg-chosen-day;
-                    color: #fff;
-                    opacity: 0.35;
-                }
-
-                .in-range-first-day {
-                    background: $bg-chosen-day;
-                    color: #fff;
-                    border-radius: 6px 0 0 6px;
-                    opacity: 0.35;
-                }
-
-                .in-range-last-day {
-                    background: $bg-chosen-day;
-                    color: #fff;
-                    border-radius: 0 6px 6px 0;
-                    opacity: 0.35;
-                }
+            .in-range-last-day {
+                background: $bg-chosen-day;
+                color: #fff;
+                border-radius: 0 6px 6px 0;
+                opacity: 0.35;
             }
         }
     }
