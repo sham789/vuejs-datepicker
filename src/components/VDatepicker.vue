@@ -1,51 +1,52 @@
 <template>
-    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
-    <div class="cont dpicker-fields">
-        <input type="text"
-               placeholder="Check In"
-               v-model="checkIn"
-               :class="{ 'chosen-dpicker-field': !isCheckOut && isCheckOut !== null }"
-               v-on:click="showCalendar($event, false)"
-        >
-        <input type="text"
-               placeholder="Check Out"
-               v-model="checkOut"
-               :class="{ 'chosen-dpicker-field': isCheckOut }"
-               v-on:click="showCalendar($event, true)"
-        >
-    </div>
-    <div id="sham-datepicker" v-if="seen" v-on:mouseleav1e="hideCalendar">
-        <div class="h-wrapper d-grid">
-            <a @click="decreaseMonth">
-                Left
-            </a>
-            <div>{{ currentMonth.monthName }} {{ currentMonth.year }}</div>
-            <a @click="increaseMonth">
-                Right
-            </a>
+    <div>
+        <div class="cont dpicker-fields">
+            <input type="text"
+                   placeholder="Check In"
+                   v-model="checkIn"
+                   :class="{ 'chosen-dpicker-field': !isCheckOut && isCheckOut !== null }"
+                   v-on:click="showCalendar($event, false)"
+            >
+            <input type="text"
+                   placeholder="Check Out"
+                   v-model="checkOut"
+                   :class="{ 'chosen-dpicker-field': isCheckOut }"
+                   v-on:click="showCalendar($event, true)"
+            >
         </div>
-        <hr/>
-        <div class="w-wrapper d-grid">
-            <div v-for="dayn in weeks" class="g-item">{{ dayn }}</div>
-        </div>
-        <hr/>
-        <div class="w-wrapper d-grid">
-            <a
-                    v-for="month in adjacentMonthRange"
-                    class="g-item"
-                    v-on:click="selectDate($event, month)"
-            >{{ month.day }}
-                <div
-                        :style="{ display: 'none' }"
-                >{{ convertRangeDayInstanceToClassName(month, false, '-') }}</div>
-            </a>
-        </div>
-        <div>
-            <a
-                    class="dp-clear-dates-btn"
-                    v-on:click="clearDates">
-                Clear dates
-            </a>
+        <div id="sham-datepicker" v-if="seen" v-on:mouseleav1e="hideCalendar">
+            <div class="h-wrapper d-grid">
+                <a @click="decreaseMonth">
+                    Left
+                </a>
+                <div>{{ currentMonth.monthName }} {{ currentMonth.year }}</div>
+                <a @click="increaseMonth">
+                    Right
+                </a>
+            </div>
+            <hr/>
+            <div class="w-wrapper d-grid">
+                <div v-for="dayn in weeks" class="g-item">{{ dayn }}</div>
+            </div>
+            <hr/>
+            <div class="w-wrapper d-grid">
+                <a
+                        v-for="month in adjacentMonthRange"
+                        class="g-item"
+                        v-on:click="selectDate($event, month)"
+                >{{ month.day }}
+                    <div
+                            :style="{ display: 'none' }"
+                    >{{ convertRangeDayInstanceToClassName(month, false, '-') }}</div>
+                </a>
+            </div>
+            <div>
+                <a
+                        class="dp-clear-dates-btn"
+                        v-on:click="clearDates">
+                    Clear dates
+                </a>
+            </div>
         </div>
     </div>
 </template>
@@ -294,6 +295,130 @@
     }
 </script>
 
-<style scoped>
+<style lang="scss">
+
+    $bg-chosen-day: #52A2FF;
+    $range-opacity: 0.35;
+    $dp-width: 320px;
+    $dp-height: 332px + 25;
+
+    #app {
+        .cont {
+            padding: 15px;
+        }
+
+        .dpicker-fields {
+            input {
+                border: none;
+                border-radius: 6px;
+                width: 142px;
+                padding: 8px;
+                font-size: 16px;
+            }
+
+            .chosen-dpicker-field {
+                color: $bg-chosen-day;
+                background: #a3cdff;
+            }
+        }
+
+        font-family: 'Open Sans';
+        font-weight: 600;
+
+        #sham-datepicker {
+            position: absolute;
+            width: $dp-width;
+            height: $dp-height;
+            background: #ffffff;
+            box-shadow: 0 6px 32px 0 rgba(0,0,0,0.15);
+            border-radius: 6px;
+            left: 15px;
+            margin: 0 auto;
+
+            hr {
+                margin: 0px;
+                opacity: 0.5;
+                height: 1px;
+                background: #EDEDED;
+            }
+
+            a {
+                cursor: pointer;
+            }
+
+            .d-grid {
+                display: grid;
+            }
+
+            .h-wrapper {
+                padding: 13px 20px 13px;
+                grid-template-columns: 40px 1fr 40px;
+                text-align: center;
+            }
+
+            .dp-clear-dates-btn {
+                font-size: 13px;
+                color: $bg-chosen-day;
+                float: right;
+                margin-right: 45px;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            .w-wrapper {
+                padding: 5px 30px;
+                /* padding: 7.5px 30px; */
+                grid-template-columns: repeat(7, 1fr);
+                /* grid-column-gap: 5px; */
+                grid-row-gap: 5px;
+
+                a {
+                    cursor: pointer;
+                }
+
+                .g-item {
+                    text-align: center;
+                    justify-item: center;
+                    /* background: #ddd; */
+                    background: #fff;
+                    padding: 5px 0 5px;
+                    width: 100%;
+                }
+
+                .picked-day {
+                    background: $bg-chosen-day;
+                    color: #fff;
+                    border-radius: 6px;
+                }
+
+                .hidden-bg-day {
+
+                }
+
+                .in-range-day {
+                    background: $bg-chosen-day;
+                    color: #fff;
+                    opacity: 0.35;
+                }
+
+                .in-range-first-day {
+                    background: $bg-chosen-day;
+                    color: #fff;
+                    border-radius: 6px 0 0 6px;
+                    opacity: 0.35;
+                }
+
+                .in-range-last-day {
+                    background: $bg-chosen-day;
+                    color: #fff;
+                    border-radius: 0 6px 6px 0;
+                    opacity: 0.35;
+                }
+            }
+        }
+    }
+
 
 </style>
