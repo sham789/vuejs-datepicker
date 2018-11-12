@@ -461,24 +461,38 @@
 
             }
 
-            .in-range-day {
-                background: $bg-chosen-day;
+            @mixin range-day($opacity, $bg) {
+                background: $bg;
                 color: #fff;
-                opacity: 0.35;
+                opacity: $opacity;
+            }
+
+            .in-range-day {
+                @include range-day(0.35, $bg-chosen-day);
             }
 
             .in-range-first-day {
-                background: $bg-chosen-day;
-                color: #fff;
+                @include range-day(0.35, $bg-chosen-day);
                 border-radius: 6px 0 0 6px;
-                opacity: 0.35;
             }
 
             .in-range-last-day {
-                background: $bg-chosen-day;
-                color: #fff;
+                @include range-day(0.35, $bg-chosen-day);
                 border-radius: 0 6px 6px 0;
-                opacity: 0.35;
+            }
+
+            .picked-in-day {
+                @include range-day(1, $bg-chosen-day);
+            }
+
+            .picked-in-first-day {
+                @include range-day(1, $bg-chosen-day);
+                border-radius: 6px 0 0 6px;
+            }
+
+            .picked-in-last-day {
+                @include range-day(1, $bg-chosen-day);
+                border-radius: 0 6px 6px 0;
             }
         }
     }
