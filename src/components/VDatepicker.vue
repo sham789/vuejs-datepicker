@@ -38,7 +38,9 @@
                     class="g-item"
                     :class="{
                         'picked-day': isDayPicked(month),
-                        'in-range-day': isDayInRange(month)
+                        'in-range-day': isDayInRange(month),
+                        'in-range-first-day': isDayLastInRange(month) && !isCheckOut,
+                        'in-range-last-day': isDayLastInRange(month) && isCheckOut
                     }"
                     v-on:mouseover="initRange($event, index)"
                     v-on:click="selectDate($event, month)"
@@ -163,8 +165,33 @@
 
                 }
             },
-            isDayInRange: function() {
+            isDayInRange: function(month) {
+                month = this.convertRangeDayInstanceToClassName(month, true, '/');
 
+                let comparisons = [
+                    this.compareTwoDates(this.checkIn, month),
+                    this.compareTwoDates(this.checkOut, month),
+                    this.compareTwoDates(this.mouseFocusedDate, month),
+                ];
+
+                if(this.isCheckOut) {
+                    if(comparisons[0].lastBigger && comparisons[2].firstBigger) {
+                        return true;
+                    }
+                } else {
+                    if(comparisons[1].firstBigger && comparisons[2].lastBigger) {
+                        return true;
+                    }
+                }
+            },
+            isDayLastInRange: function(month) {
+                let incremValue;
+                this.isCheckOut ? incremValue = -1 : incremValue = 1;
+
+                let isIncrementedDateInRange = this.isDayInRange(this.incrementDateBy(month, 'day', incremValue));
+                let focusedDateComparison = this.compareTwoDates(this.convertRangeDayInstanceToClassName(month), this.mouseFocusedDate);
+
+                return isIncrementedDateInRange && focusedDateComparison.equals;
             },
             clearDates: function() {
                 this.checkIn = 'Check In';
@@ -279,6 +306,12 @@
                         return dt;
                     }
                 };
+
+                if(initDate.month && initDate.day && initDate.year) {
+                    let date = Object.assign({}, initDate);
+                    date[param] += incrementValue;
+                    return date;
+                }
 
                 if(Object.keys(incrementMethods).indexOf(param) !== -1) {
                     let date = incrementMethods[param](initDate);
