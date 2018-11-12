@@ -25,20 +25,23 @@
                 </a>
             </div>
             <hr/>
+            <ul>
+                <li>{{ mouseFocusedDate }}</li>
+            </ul>
             <div class="w-wrapper d-grid">
                 <div v-for="dayn in weeks" class="g-item">{{ dayn }}</div>
             </div>
             <hr/>
             <div class="w-wrapper d-grid">
                 <a
-                        v-for="month, index in adjacentMonthRange"
-                        class="g-item"
-                        :class="{
-        'picked-day': !isCheckOut ? convertRangeDayInstanceToClassName(month, true, '/') === checkOut : convertRangeDayInstanceToClassName(month, true, '/') === checkIn,
-        'in-range-day': !isCheckOut ? (compareTwoDates(checkIn, mouseFocusedDate).lastBigger && compareTwoDates(convertRangeDayInstanceToClassName(month, false, '-'), mouseFocusedDate).lastBigger) : compareTwoDates(checkOut, mouseFocusedDate).firstBigger
-      }"
-                        v-on:mouseover="initRange($event, index)"
-                        v-on:click="selectDate($event, month)"
+                    v-for="month, index in adjacentMonthRange"
+                    class="g-item"
+                    :class="{
+                        'picked-day': isDayPicked(month),
+                        'in-range-day': isDayInRange(month)
+                    }"
+                    v-on:mouseover="initRange($event, index)"
+                    v-on:click="selectDate($event, month)"
                 >{{ month.day }}
                     <div :style="{ display: 'none' }"
                     >{{ convertRangeDayInstanceToClassName(month, false, '-') }}
@@ -47,8 +50,8 @@
             </div>
             <div>
                 <a
-                        class="dp-clear-dates-btn"
-                        v-on:click="clearDates">
+                    class="dp-clear-dates-btn"
+                    v-on:click="clearDates">
                     Clear dates
                 </a>
             </div>
@@ -105,7 +108,7 @@
             adjacentMonthRange: function() {
                 let main = {
                     range: []
-                }
+                };
 
                 function RangeDay(day, month, year) {
                     this.day = day;
@@ -151,10 +154,32 @@
             initRange: function($event, index) {
                 let internalDate = $event.target.firstElementChild.innerText;
                 this.mouseFocusedDate = internalDate.replace(/(\s|\n)/g, '');
+                let firstComparison = this.compareTwoDates(this.checkIn, this.mouseFocusedDate);
+                let secondComparison = this.compareTwoDates(this.checkOut, this.mouseFocusedDate);
+
+                if(!this.isCheckOut) {
+
+                } else {
+
+                }
+            },
+            isDayInRange: function() {
+
             },
             clearDates: function() {
                 this.checkIn = 'Check In';
                 this.checkOut = 'Check Out';
+            },
+            isDayPicked: function(month) {
+                let equalsTo;
+
+                if(!this.isCheckOut) {
+                    equalsTo = this.checkOut;
+                } else {
+                    equalsTo = this.checkIn;
+                }
+
+                return this.convertRangeDayInstanceToClassName(month, true, '/') === equalsTo;
             },
             selectDate: function(event, rangeDayInstance) {
                 let selectedDate = this.convertRangeDayInstanceToClassName(
@@ -163,12 +188,11 @@
                 let fieldsInvalid = {
                     checkIn: this.checkIn === 'Check In',
                     checkOut: this.checkOut === 'Check Out'
-                }
+                };
 
                 if(this.isCheckOut) {
                     this.checkOut = selectedDate;
                     incrementBy = -1;
-
                 } else {
                     this.checkIn = selectedDate;
                     incrementBy = 1;
@@ -177,7 +201,10 @@
                 let dateComparison = this.compareTwoDates(this.checkIn, this.checkOut);
 
                 if(dateComparison.firstBigger || dateComparison.equals) {
-                    let incremented = this.incrementDateBy(this.checkOut, 'day', incrementBy);
+                    let consideredDate;
+
+                    !this.isCheckOut ? consideredDate = this.checkIn : consideredDate = this.checkOut;
+                    let incremented = this.incrementDateBy(consideredDate, 'day', incrementBy);
                     incremented = this.getDateConverted(incremented, true, '/');
                     this.isCheckOut ? this.checkIn = incremented : this.checkOut = incremented;
                 }
@@ -230,7 +257,7 @@
             },
             /* Method is used for checking inside array mapping */
             concatZeroToDate: function(date, index, sliceYear) {
-                if (index != 2 && date < 10) {
+                if (index !== 2 && date < 10) {
                     date = '0' + date;
                 } else if (index === 2) {
                     date = date.toString().slice(0, 4);
@@ -251,7 +278,7 @@
                         dt.setMonth(dt.getMonth() + incrementValue);
                         return dt;
                     }
-                }
+                };
 
                 if(Object.keys(incrementMethods).indexOf(param) !== -1) {
                     let date = incrementMethods[param](initDate);
@@ -267,7 +294,7 @@
                     return dt.getTime();
                 });
 
-                let info = [[...arguments], dates, dates[0] > dates[1]]
+                let info = [[...arguments], dates, dates[0] > dates[1]];
 
                 return {
                     firstBigger: dates[0] > dates[1],
