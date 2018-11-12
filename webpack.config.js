@@ -6,7 +6,8 @@ module.exports = {
     mode: 'development',
     entry: [
         './scss/main.scss',
-        './src/app.js'
+        './src/app.js',
+        'webpack/hot/dev-server'
     ],
     module: {
         rules: [

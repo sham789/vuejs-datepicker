@@ -14,7 +14,7 @@
                    v-on:click="showCalendar($event, true)"
             >
         </div>
-        <div id="sham-datepicker" v-if="seen" v-on:mouseleav1e="hideCalendar">
+        <div id="sham-datepicker" v-if="seen" v-on:mouse1leave="hideCalendar">
             <div class="h-wrapper d-grid">
                 <a @click="decreaseMonth">
                     Left
@@ -31,13 +31,18 @@
             <hr/>
             <div class="w-wrapper d-grid">
                 <a
-                        v-for="month in adjacentMonthRange"
+                        v-for="month, index in adjacentMonthRange"
                         class="g-item"
+                        :class="{
+        'picked-day': !isCheckOut ? convertRangeDayInstanceToClassName(month, true, '/') === checkOut : convertRangeDayInstanceToClassName(month, true, '/') === checkIn,
+        'in-range-day': !isCheckOut ? (compareTwoDates(checkIn, mouseFocusedDate).lastBigger && compareTwoDates(convertRangeDayInstanceToClassName(month, false, '-'), mouseFocusedDate).lastBigger) : compareTwoDates(checkOut, mouseFocusedDate).firstBigger
+      }"
+                        v-on:mouseover="initRange($event, index)"
                         v-on:click="selectDate($event, month)"
                 >{{ month.day }}
-                    <div
-                            :style="{ display: 'none' }"
-                    >{{ convertRangeDayInstanceToClassName(month, false, '-') }}</div>
+                    <div :style="{ display: 'none' }"
+                    >{{ convertRangeDayInstanceToClassName(month, false, '-') }}
+                    </div>
                 </a>
             </div>
             <div>
@@ -63,7 +68,9 @@
                 weeks: ['SU','MO','TU','WE','TH','Fr','SA'],
                 currentDate: 10,
                 days: Array(42).fill('*'),
-                bindedText: ''
+                bindedText: '',
+                hoveredDate: '',
+                mouseFocusedDate: null
             }
         },
         computed: {
@@ -98,7 +105,7 @@
             adjacentMonthRange: function() {
                 let main = {
                     range: []
-                };
+                }
 
                 function RangeDay(day, month, year) {
                     this.day = day;
@@ -141,8 +148,9 @@
             }
         },
         methods: {
-            initRange: function() {
-
+            initRange: function($event, index) {
+                let internalDate = $event.target.firstElementChild.innerText;
+                this.mouseFocusedDate = internalDate.replace(/(\s|\n)/g, '');
             },
             clearDates: function() {
                 this.checkIn = 'Check In';
@@ -151,7 +159,7 @@
             selectDate: function(event, rangeDayInstance) {
                 let selectedDate = this.convertRangeDayInstanceToClassName(
                     rangeDayInstance, true, '/');
-
+                let incrementBy = 0;
                 let fieldsInvalid = {
                     checkIn: this.checkIn === 'Check In',
                     checkOut: this.checkOut === 'Check Out'
@@ -159,22 +167,19 @@
 
                 if(this.isCheckOut) {
                     this.checkOut = selectedDate;
+                    incrementBy = -1;
+
                 } else {
-
                     this.checkIn = selectedDate;
-                    let dateComparison = this.compareTwoDates(this.checkIn, this.checkOut);
+                    incrementBy = 1;
+                }
 
-                    if(dateComparison.firstBigger || dateComparison.equals) {
-                        let incremented = this.incrementDateBy(this.checkIn, 'day', 1);
-                        this.checkOut = this.getDateConverted(incremented, true, '/');
-                    }
+                let dateComparison = this.compareTwoDates(this.checkIn, this.checkOut);
 
-                    if(!fieldsInvalid.checkIn) {
-
-                    } else {
-
-                    }
-
+                if(dateComparison.firstBigger || dateComparison.equals) {
+                    let incremented = this.incrementDateBy(this.checkOut, 'day', incrementBy);
+                    incremented = this.getDateConverted(incremented, true, '/');
+                    this.isCheckOut ? this.checkIn = incremented : this.checkOut = incremented;
                 }
 
                 if(fieldsInvalid.checkIn || fieldsInvalid.checkOut) {
@@ -225,7 +230,7 @@
             },
             /* Method is used for checking inside array mapping */
             concatZeroToDate: function(date, index, sliceYear) {
-                if (index !== 2 && date < 10) {
+                if (index != 2 && date < 10) {
                     date = '0' + date;
                 } else if (index === 2) {
                     date = date.toString().slice(0, 4);
@@ -261,7 +266,8 @@
                     let dt = new Date(date);
                     return dt.getTime();
                 });
-                console.log([...arguments], dates, dates[0] > dates[1]);
+
+                let info = [[...arguments], dates, dates[0] > dates[1]]
 
                 return {
                     firstBigger: dates[0] > dates[1],
